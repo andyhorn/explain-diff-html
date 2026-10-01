@@ -3,3 +3,4 @@
 .claude/autoharness/
 .claude/skills/*/.ledger.jsonl
 .claude/skills/*/.sidecar.json
+evals/results/
