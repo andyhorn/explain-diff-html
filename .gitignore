@@ -1,3 +1,5 @@
 .playwright-cli/
 .DS_Store
 .claude/autoharness/
+.claude/skills/*/.ledger.jsonl
+.claude/skills/*/.sidecar.json
