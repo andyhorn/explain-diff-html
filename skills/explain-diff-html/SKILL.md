@@ -1,13 +1,12 @@
 ---
 name: explain-diff-html
 description: >-
-  Produce a rich, interactive, self-contained HTML explanation of a diff,
-  branch, or pull request, with Background, Intuition, Code walkthrough, and a
-  Quiz, written as one dated file to a code-explanations folder in the user's
-  home directory, outside the repo.
-  Triggers on "explain this diff", "walk me through this branch", "explain PR
-  1234". Not for reviewing changes and not for explaining a standalone issue
-  ticket.
+  Use when asked to explain, walk through, or teach a code change rather than
+  review it: "explain PR 1234", "explain this diff", "walk me through this
+  branch", "what changed between abc123 and def456", or a request to help
+  someone new understand a merged change. Produces a self-contained HTML
+  teaching page. Not for critiquing or approving a change, and not for an
+  issue ticket with no diff behind it.
 ---
 
 # Explain Diff (HTML)
