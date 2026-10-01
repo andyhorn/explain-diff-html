@@ -4,7 +4,7 @@ An agent skill that turns a code change into one self-contained HTML page that
 teaches a reader what changed and why. It runs in Claude Code, Codex, Cursor,
 and every other agent the `skills` installer reaches.
 
-[![skills.sh](https://skills.sh/b/malav2110/explain-diff-html?style=for-the-badge)](https://skills.sh/malav2110/explain-diff-html)
+[![skills.sh](https://skills.sh/b/andyhorn/explain-diff-html?style=for-the-badge)](https://skills.sh/andyhorn/explain-diff-html)
 
 ![A thirty-second walkthrough. Title cards ask where to start when Git shows a
 large change file by file. A generated page then scrolls through its contents
@@ -15,7 +15,11 @@ that close it.](assets/explain-diff-html-demo.gif)
 
 ## Origin
 
-This started from [Geoffrey Litt's explain-diff gist](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524),
+This repository is a fork of [Malav Shah's explain-diff-html](https://github.com/malav2110/explain-diff-html),
+which built the skill as it stands here. The changes in this fork are listed
+in its commit history.
+
+That work started from [Geoffrey Litt's explain-diff gist](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524),
 which set out the four-section structure, the quiz, the self-contained HTML
 output, and the skill's name. This version adds flow-ordered walkthroughs,
 verified `file:line` anchors at the target ref, Mermaid diagrams with
@@ -167,15 +171,15 @@ instead, because GitHub serves `.html` as code rather than rendering it.
 
 | Page                                                                                                                  | Repository                 | Source                                                       | What it teaches                                                                                                          |
 | --------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| [v30.1.0](https://malav2110.github.io/explain-diff-html/samples/jsdom/2026-09-17-v30-1-0-explanation.html)            | jsdom/jsdom, JavaScript    | [v30.1.0](https://github.com/jsdom/jsdom/releases/tag/v30.1.0) | Why a release of small fixes moved 127 files, and the style guide that keeps the cause out of the release notes         |
-| [PR 11305](https://malav2110.github.io/explain-diff-html/samples/tanstack-query/2026-09-01-pr-11305-explanation.html) | TanStack/query, TypeScript | [11305](https://github.com/TanStack/query/pull/11305)        | A `?.field` guard answering two questions at once, so falsy errors never reached the error boundary                      |
-| [PR 11242](https://malav2110.github.io/explain-diff-html/samples/tanstack-query/2026-09-01-pr-11242-explanation.html) | TanStack/query, TypeScript | [11242](https://github.com/TanStack/query/pull/11242)        | A guard that reset only on the happy path, and why the fix uses `finally` with no `catch`                                |
-| [PR 16102](https://malav2110.github.io/explain-diff-html/samples/fastapi/2026-09-01-pr-16102-explanation.html)        | fastapi/fastapi, Python    | [16102](https://github.com/fastapi/fastapi/pull/16102)       | A three-valued option collapsed at the public boundary, and the stack depth a warning depends on                         |
-| [PR 16013](https://malav2110.github.io/explain-diff-html/samples/fastapi/2026-09-01-pr-16013-explanation.html)        | fastapi/fastapi, Python    | [16013](https://github.com/fastapi/fastapi/pull/16013)       | Double-checked locking and build-then-publish, and why the list is assigned before the version                           |
-| [PR 15800](https://malav2110.github.io/explain-diff-html/samples/fastapi/2026-09-13-pr-15800-explanation.html)        | fastapi/fastapi, Python    | [15800](https://github.com/fastapi/fastapi/pull/15800)       | A second route list consulted only after every path operation missed, and how a miss tells a browser from an asset fetch |
-| [PR 2924](https://malav2110.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2924-explanation.html)          | uPortal, Java              | [2924](https://github.com/uPortal-Project/uPortal/pull/2924) | A catch that logs and falls through, and an `@Ignore` that had been skipping 30 tests                                    |
-| [PR 2945](https://malav2110.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2945-explanation.html)          | uPortal, Java              | [2945](https://github.com/uPortal-Project/uPortal/pull/2945) | Picking the type that matches the intent, so a static-analysis suppression stops being needed                            |
-| [PR 2983](https://malav2110.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2983-explanation.html)          | uPortal, Java              | [2983](https://github.com/uPortal-Project/uPortal/pull/2983) | An implicit path attribute made explicit, moving resolution from the server to the browser                               |
+| [v30.1.0](https://andyhorn.github.io/explain-diff-html/samples/jsdom/2026-09-17-v30-1-0-explanation.html)            | jsdom/jsdom, JavaScript    | [v30.1.0](https://github.com/jsdom/jsdom/releases/tag/v30.1.0) | Why a release of small fixes moved 127 files, and the style guide that keeps the cause out of the release notes         |
+| [PR 11305](https://andyhorn.github.io/explain-diff-html/samples/tanstack-query/2026-09-01-pr-11305-explanation.html) | TanStack/query, TypeScript | [11305](https://github.com/TanStack/query/pull/11305)        | A `?.field` guard answering two questions at once, so falsy errors never reached the error boundary                      |
+| [PR 11242](https://andyhorn.github.io/explain-diff-html/samples/tanstack-query/2026-09-01-pr-11242-explanation.html) | TanStack/query, TypeScript | [11242](https://github.com/TanStack/query/pull/11242)        | A guard that reset only on the happy path, and why the fix uses `finally` with no `catch`                                |
+| [PR 16102](https://andyhorn.github.io/explain-diff-html/samples/fastapi/2026-09-01-pr-16102-explanation.html)        | fastapi/fastapi, Python    | [16102](https://github.com/fastapi/fastapi/pull/16102)       | A three-valued option collapsed at the public boundary, and the stack depth a warning depends on                         |
+| [PR 16013](https://andyhorn.github.io/explain-diff-html/samples/fastapi/2026-09-01-pr-16013-explanation.html)        | fastapi/fastapi, Python    | [16013](https://github.com/fastapi/fastapi/pull/16013)       | Double-checked locking and build-then-publish, and why the list is assigned before the version                           |
+| [PR 15800](https://andyhorn.github.io/explain-diff-html/samples/fastapi/2026-09-13-pr-15800-explanation.html)        | fastapi/fastapi, Python    | [15800](https://github.com/fastapi/fastapi/pull/15800)       | A second route list consulted only after every path operation missed, and how a miss tells a browser from an asset fetch |
+| [PR 2924](https://andyhorn.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2924-explanation.html)          | uPortal, Java              | [2924](https://github.com/uPortal-Project/uPortal/pull/2924) | A catch that logs and falls through, and an `@Ignore` that had been skipping 30 tests                                    |
+| [PR 2945](https://andyhorn.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2945-explanation.html)          | uPortal, Java              | [2945](https://github.com/uPortal-Project/uPortal/pull/2945) | Picking the type that matches the intent, so a static-analysis suppression stops being needed                            |
+| [PR 2983](https://andyhorn.github.io/explain-diff-html/samples/uportal/2026-09-01-pr-2983-explanation.html)          | uPortal, Java              | [2983](https://github.com/uPortal-Project/uPortal/pull/2983) | An implicit path attribute made explicit, moving resolution from the server to the browser                               |
 
 Every page went through two checks. A read-only pass re-opens each cited
 `file:line` at the target ref and tries to falsify the claim. A cold read then
@@ -210,7 +214,7 @@ in any browser on any platform.
 One command, run from the project you want it in:
 
 ```bash
-npx skills add malav2110/explain-diff-html
+npx skills add andyhorn/explain-diff-html
 ```
 
 That installs it for that project alone. Add `-g` to install it once for every
@@ -223,7 +227,7 @@ them Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, Windsurf, Zed,
 opencode, and Goose. It installs to the agents it detects, or to ones you name:
 
 ```bash
-npx skills add malav2110/explain-diff-html -a codex
+npx skills add andyhorn/explain-diff-html -a codex
 ```
 
 Then `npx skills list` shows what is installed, `npx skills update` moves it to
@@ -237,14 +241,14 @@ directory into place works too, and needs no Node.
 For every project you work on:
 
 ```bash
-git clone https://github.com/malav2110/explain-diff-html.git /tmp/edh
+git clone https://github.com/andyhorn/explain-diff-html.git /tmp/edh
 cp -R /tmp/edh/skills/explain-diff-html ~/.claude/skills/
 ```
 
 For one project only, committed alongside the code so your team gets it too:
 
 ```bash
-git clone https://github.com/malav2110/explain-diff-html.git /tmp/edh
+git clone https://github.com/andyhorn/explain-diff-html.git /tmp/edh
 cp -R /tmp/edh/skills/explain-diff-html <your-repo>/.claude/skills/
 ```
 
