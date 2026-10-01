@@ -93,6 +93,11 @@ that mistake now fails instead of passing.
   `refs` minus the references you deliberately left bare, and you should be able
   to name every one of those and say which of the two reasons applies.
 
+- No `file:line` reference shortens its path with `...`. The script fails on
+  `.../` inside a `.filename` label or a `<code>` span, because a link cannot
+  be built from a shortened path and the reference then stays bare. Write the
+  full path from the repository root.
+
 - Every table-of-contents link resolves to a section anchor on the page, and
   every section on the page appears in the table of contents.
 

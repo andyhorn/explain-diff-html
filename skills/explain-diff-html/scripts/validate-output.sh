@@ -51,6 +51,17 @@ else
   echo "pass: every Markdown line link carries ?plain=1"
 fi
 
+# A path shortened with "..." cannot be linked, so the reference stays bare.
+elided=$(tr '\n' ' ' < "$page" | sed -E 's/  +/ /g' \
+  | grep -oE '(<code[^>]*>|class="filename"[^>]*>)( *<a[^>]*>)? *[^<]*\.\.\./[^<]*')
+if [ -n "$elided" ]; then
+  echo "FAIL: references with a shortened path:"
+  echo "$elided"
+  status=1
+else
+  echo "pass: no reference shortens its path with ..."
+fi
+
 quiz() {
   sed -n '/<section id="quiz"/,/<\/section>/p' "$page" \
     | tr '\n' ' ' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
