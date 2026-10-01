@@ -397,6 +397,14 @@ them together as one step rather than scattering them alphabetically.
 Name each file with a `path/to/file.ext:line` reference so a reader can find
 it, but let the flow, not the path, set the order.
 
+Write the path in full from the repository root, in the `.filename` label and
+in prose alike. Never shorten it with `...`. The link described below is built
+from the label text, so a shortened path cannot be linked and the label stays
+bare with no reason a reader can see. The template wraps a long path, so
+length is not a reason to cut it. Three of the samples in this repository
+shipped with `uPortal-rendering/.../url/File.java:894` labels for exactly this
+reason, and every one of them went unlinked.
+
 Anchor to the first line of what you quote, and use a range when you quote
 several lines: `errorBoundaryUtils.ts:70-77` for a quoted block,
 `useQueries.ts:326` for a single line. Do not anchor to the enclosing function
