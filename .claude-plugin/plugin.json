@@ -4,11 +4,11 @@
   "version": "1.2.0",
   "description": "Turn a pull request, branch, or commit range into one self-contained HTML page that teaches a reader what changed and why. It explains a change; it does not review one.",
   "author": {
-    "name": "Malav Shah",
-    "url": "https://github.com/malav2110"
+    "name": "Andrew Horn",
+    "url": "https://github.com/andyhorn"
   },
-  "homepage": "https://malav2110.github.io/explain-diff-html/",
-  "repository": "https://github.com/malav2110/explain-diff-html",
+  "homepage": "https://andyhorn.github.io/explain-diff-html/",
+  "repository": "https://github.com/andyhorn/explain-diff-html",
   "license": "MIT",
   "keywords": ["pull-request", "diff", "onboarding", "documentation", "walkthrough"]
 }
