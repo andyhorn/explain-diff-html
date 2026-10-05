@@ -161,11 +161,20 @@ that mistake now fails instead of passing.
   screen and a five-line block becomes "four lines". Run it:
 
   ```bash
-  # lines actually pasted into a <pre>, which a range label has to match
-  sed -n '/<pre>/,/<\/pre>/p' "<work>/draft.html" | sed '1d;$d' | wc -l
+  # lines pasted into each <pre>, in page order, which each range label has to match
+  awk '/<pre[ >]/ { inb = 1; n = 0; b++; tag = $0; sub(/.*<pre/, "<pre", tag); sub(/>.*/, ">", tag)
+                    sub(/.*<pre[^>]*>/, ""); if ($0 == "") next }
+       inb && /<\/pre/ { sub(/<\/pre.*/, ""); if ($0 != "") n++
+                         print "block " b " " tag ": " n " lines"; inb = 0; next }
+       inb { n++ }' "<work>/draft.html"
   wc -l fastapi/cli.py                             # lines in a file
   grep -o 'pattern' path | wc -l                   # occurrences
   ```
+
+  The `<pre>` count prints one line per block, so match each block to the label
+  above it rather than reading one total. It counts a code line that shares a
+  line with the opening tag, and it matches `</pre` without the `>`, because a
+  formatter can split the closing tag across two lines.
 
   Then grep the page for every number it states and confirm each against the
   command that produced it. A count is the easiest claim to get wrong and the
