@@ -51,12 +51,30 @@ else
   echo "pass: every Markdown line link carries ?plain=1"
 fi
 
+# Extract the quiz section by tracking <section> depth, so a nested section
+# cannot end it early and id need not be the first attribute.
 quiz() {
-  sed -n '/<section id="quiz"/,/<\/section>/p' "$page" \
-    | tr '\n' ' ' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
+  tr '\n' ' ' < "$page" | awk '{
+    if (!match($0, /<section[^>]*[ \t]id="quiz"[^>]*>/)) exit
+    s = substr($0, RSTART + RLENGTH); depth = 1; out = ""
+    while (depth > 0 && match(s, /<\/?section[ >]/)) {
+      tag = substr(s, RSTART, RLENGTH)
+      out = out substr(s, 1, RSTART - 1) " "
+      s = substr(s, RSTART + RLENGTH)
+      if (tag ~ /^<\//) depth--; else depth++
+    }
+    if (depth > 0) out = out s
+    print out
+  }' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
 }
 
-positional=$(quiz | grep -oEi 'the (first|second|third|last) option|the (former|latter)\b')
+quiz_text=$(quiz)
+if [ -z "$(printf '%s' "$quiz_text" | tr -d ' ')" ]; then
+  echo "FAIL: no quiz section found, so the quiz checks read nothing"
+  status=1
+fi
+
+positional=$(printf '%s\n' "$quiz_text" | grep -oEi 'the (first|second|third|last) option|the (former|latter)\b')
 if [ -n "$positional" ]; then
   echo "FAIL: quiz text names an option by position:"
   echo "$positional"
@@ -66,6 +84,6 @@ else
 fi
 
 echo "advisory: ordinals in the quiz, read each one:"
-quiz | grep -oEi 'the (first|second|third|last|former|latter)\b[^.]{0,40}' || echo "  none"
+printf '%s\n' "$quiz_text" | grep -oEi 'the (first|second|third|last|former|latter)\b[^.]{0,40}' || echo "  none"
 
 exit $status
