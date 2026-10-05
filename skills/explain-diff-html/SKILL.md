@@ -303,9 +303,11 @@ The output contract gives the filename key precedence. These are the patterns
 behind it.
 
 A tracker-style issue key matches `[A-Z][A-Z0-9]+-[0-9]+`, such as `PROJ-1234`.
-A labeled issue number matches `(issue|gh|#)[-_]?[0-9]+`, such as `issue-456` or
-`gh-456`. Require the label: a bare number also matches a date or a version in a
-branch name such as `cleanup-2024-q1`, which produces a meaningless filename.
+A labeled issue number matches `(^|[/_-])(issue|gh|#)[-_]?[0-9]+`, such as
+`issue-456` or `gh-456`; drop the leading separator from the match. Require the
+label: a bare number also matches a date or a version in a branch name such as
+`cleanup-2024-q1`, which produces a meaningless filename. Require it to start the
+name or follow a separator, too, or `fix-high-5` yields `gh-5` from inside "high".
 
 Both read the branch name, so both apply only to a pull request, a named branch,
 or the current checkout. A commit range and a single commit have no branch, which
