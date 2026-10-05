@@ -421,8 +421,23 @@ gh pr view <n> --json url -q .url    # https://github.com/owner/repo/pull/<n>
                                      # strip the trailing /pull/<n>
 
 # Branch, commit range, single commit, or no argument:
-git remote get-url origin | sed -E 's#^git@([^:]+):#https://\1/#; s#\.git$##'
+git remote get-url origin | sed -E '
+  s#^[a-z+]+://##
+  s#^[^@/]*@##
+  s#^([^:/]+):[0-9]+/#\1/#
+  s#^([^:/]+):#\1/#
+  s#\.git/?$##
+  s#/$##
+  /^github\.com\//!d
+  s#^#https://#'
 ```
+
+The `sed` strips the scheme, then any `user:token@`, then a port, and turns the
+`host:owner` form into `host/owner`. It prints nothing unless the host is
+exactly `github.com`, and empty output means leave every reference bare. Do not
+shorten it. A CI clone's remote often embeds a token, as in
+`https://x-access-token:<token>@github.com/owner/repo.git`, and without the
+second line that token lands in every link on a page meant for sharing.
 
 Build each link against the same commit the provenance line names, using the
 full 40-character sha:
@@ -470,7 +485,8 @@ it does today.
 
 This is GitHub only, on purpose. A url from `gh` names a GitHub-family host by
 construction, so link against whatever host it gives you. A parsed remote could
-be any forge, so link it only when the host is exactly `github.com`. GitLab and
+be any forge, so link it only when the host is exactly `github.com`, which the
+`sed` above enforces. GitLab and
 Bitbucket build blob URLs differently, and a GitHub-shaped URL aimed at them
 resolves to nothing. Leave those references bare rather than guess.
 
