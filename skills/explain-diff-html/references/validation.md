@@ -123,8 +123,11 @@ that mistake now fails instead of passing.
   option" at the start of the next. Every sample in this repository has a quiz
   line ending in "the", so the hazard is not rare, it is universal, and a
   line-based version of this check reports clean on a page that violates the
-  rule. The `sed` range confines the search to the quiz, since the template's own
-  comments say things like "the first render".
+  rule. The script confines the search to the quiz, since the template's own
+  comments say things like "the first render". It finds the `<section>` whose
+  `id` is `quiz`, wherever that attribute sits in the tag, and tracks nested
+  sections so an inner `</section>` cannot end the quiz early. It fails when it
+  finds no quiz text at all, because a check that reads nothing reports clean.
 
   The script then prints a wider sweep, which is advisory rather than pass or
   fail. This one catches an ordinal used on its own, as in "the first names a
