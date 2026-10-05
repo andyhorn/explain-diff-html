@@ -43,9 +43,8 @@ Please:
    ```
 
    This replaces any installed copy. It copies the files, so run it again after
-   each change. When you're done testing,
-   `npx skills add malav2110/explain-diff-html -g` puts the released version
-   back. The README's Requirements section lists the tools needed for a run.
+   each change. When you're done testing, run `npx skills add <owner>/<repo> -g`
+   with the repository you installed from to put the released version back. The README's Requirements section lists the tools needed for a run.
 
    Then, from a checkout of the repository that owns the PR, ask the agent to
    explain it. The generated page will be written to `~/code-explanations/`.

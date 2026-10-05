@@ -2,6 +2,8 @@
 tags: [full]
 max_turns: 150
 timeout_seconds: 1800
+# allowed_tools only picks read-only tools. The run also needs Bash and Write,
+# which only the CLI can grant: claude plugin eval . --allow-tools Write Bash
 allowed_tools: [Read, Glob, Grep, Skill, Agent, TodoWrite]
 runs: 1
 description: One end-to-end run against a small real commit, graded on the produced page.
