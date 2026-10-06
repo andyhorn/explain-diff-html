@@ -436,6 +436,7 @@ Empty output means leave every reference bare. A CI clone's remote can embed a
 token, as in `https://x-access-token:<token>@github.com/owner/repo.git`, and
 without the credentials line that token lands in every link on a page meant
 for sharing.
+
 Build each link against the same commit the provenance line names, using the
 full 40-character sha:
 
