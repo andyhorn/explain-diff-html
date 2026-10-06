@@ -415,23 +415,27 @@ gh pr view <n> --json url -q .url    # https://github.com/owner/repo/pull/<n>
 
 # Branch, commit range, single commit, or no argument:
 git remote get-url origin | sed -E '
+  # Drop a port. This runs before the scheme goes, because after that the
+  # owner in git@github.com:1234/repo.git would read like a port.
+  s#^([a-z+]+://[^/]*):[0-9]+/#\1/#
+  # Drop the scheme, such as https://, ssh://, or git+ssh://.
   s#^[a-z+]+://##
+  # Drop credentials, such as git@ or user:token@, so no token reaches a link.
   s#^[^@/]*@##
-  s#^([^:/]+):[0-9]+/#\1/#
+  # Turn the host:owner form into host/owner.
   s#^([^:/]+):#\1/#
+  # Drop a trailing .git, then a trailing slash.
   s#\.git/?$##
   s#/$##
+  # Print nothing unless the host is exactly github.com.
   /^github\.com\//!d
   s#^#https://#'
 ```
 
-The `sed` strips the scheme, then any `user:token@`, then a port, and turns the
-`host:owner` form into `host/owner`. It prints nothing unless the host is
-exactly `github.com`, and empty output means leave every reference bare. Do not
-shorten it. A CI clone's remote often embeds a token, as in
-`https://x-access-token:<token>@github.com/owner/repo.git`, and without the
-second line that token lands in every link on a page meant for sharing.
-
+Empty output means leave every reference bare. A CI clone's remote can embed a
+token, as in `https://x-access-token:<token>@github.com/owner/repo.git`, and
+without the credentials line that token lands in every link on a page meant
+for sharing.
 Build each link against the same commit the provenance line names, using the
 full 40-character sha:
 
