@@ -222,11 +222,16 @@ git fetch origin "refs/pull/<n>/head:refs/explain/pr-<n>"       # pull request o
 pr_base="$(gh pr view <n> --json baseRefOid -q .baseRefOid)"    # the commit it opened against
 if [ -z "$pr_base" ] || ! git fetch origin "$pr_base"; then
   # The sha is unreachable or refused: diff from where the head left the base branch.
-  git fetch origin "$(gh pr view <n> --json baseRefName -q .baseRefName)" &&
+  base_name="$(gh pr view <n> --json baseRefName -q .baseRefName)"
+  [ -n "$base_name" ] && git fetch origin "$base_name" &&
     pr_base="$(git merge-base FETCH_HEAD refs/explain/pr-<n>)"
 fi
-git diff "$pr_base" refs/explain/pr-<n> > "$work/diff.txt"      # base first, then head
-[ -s "$work/diff.txt" ] || echo "STOP: the diff is empty; resolve the base before drafting"
+if [ -z "$pr_base" ]; then
+  echo "STOP: no base commit; ask the user which commit the pull request is based on"
+else
+  git diff "$pr_base" refs/explain/pr-<n> > "$work/diff.txt"    # base first, then head
+  [ -s "$work/diff.txt" ] || echo "STOP: the diff is empty; resolve the base before drafting"
+fi
 ```
 
 Each tool call starts a new shell, so `$work` is empty in every later command.
