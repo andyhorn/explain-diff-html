@@ -537,6 +537,10 @@ Build the five questions from the question shapes in
 question. The file's rules stop a reader from answering by recall, by option
 length, or by position.
 
+Keep the quiz as the last section in `<main>`, where the template puts it, and
+add no section after it. The validation script reads the quiz from its tag to
+`</main>`, so anything placed after it is checked as quiz text.
+
 ### 6. Humanize the prose
 
 An author misses its own tells. Do not self-edit the draft in the main thread.

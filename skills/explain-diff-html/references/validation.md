@@ -119,10 +119,12 @@ that mistake now fails instead of passing.
   line ending in "the", so the hazard is not rare, it is universal, and a
   line-based version of this check reports clean on a page that violates the
   rule. The script confines the search to the quiz, since the template's own
-  comments say things like "the first render". It finds the `<section>` whose
-  `id` is `quiz`, wherever that attribute sits in the tag, and tracks nested
-  sections so an inner `</section>` cannot end the quiz early. It fails when it
-  finds no quiz text at all, because a check that reads nothing reports clean.
+  comments say things like "the first render". It reads from the tag whose `id`
+  is `quiz`, wherever that attribute sits in the tag, to `</main>`, so an inner
+  `</section>` cannot end the quiz early. That works because the quiz is the
+  last section in `<main>`; a section placed after it would be read as quiz
+  text. It fails when it finds no quiz text at all, because a check that reads
+  nothing reports clean.
 
   The script then prints a wider sweep, which is advisory rather than pass or
   fail. This one catches an ordinal used on its own, as in "the first names a

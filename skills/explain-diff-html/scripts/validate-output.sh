@@ -58,21 +58,11 @@ else
   echo "pass: every Markdown line link carries ?plain=1"
 fi
 
-# Extract the quiz section by tracking <section> depth, so a nested section
-# cannot end it early and id need not be the first attribute.
+# The quiz is the last section in <main>, so read from its tag to </main>.
+# A nested </section> cannot end it early, and id can sit anywhere in the tag.
 quiz() {
-  tr '\n' ' ' < "$page" | awk '{
-    if (!match($0, /<section[^>]*[ \t]id="quiz"[^>]*>/)) exit
-    s = substr($0, RSTART + RLENGTH); depth = 1; out = ""
-    while (depth > 0 && match(s, /<\/?section[ >]/)) {
-      tag = substr(s, RSTART, RLENGTH)
-      out = out substr(s, 1, RSTART - 1) " "
-      s = substr(s, RSTART + RLENGTH)
-      if (tag ~ /^<\//) depth--; else depth++
-    }
-    if (depth > 0) out = out s
-    print out
-  }' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
+  sed -n '/id="quiz"/,/<\/main>/p' "$page" \
+    | tr '\n' ' ' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
 }
 
 quiz_text=$(quiz)
