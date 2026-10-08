@@ -156,12 +156,19 @@ that mistake now fails instead of passing.
   screen and a five-line block becomes "four lines". Run it:
 
   ```bash
-  # lines pasted into each <pre>, in page order, which each range label has to match
-  awk '/<pre[ >]/ { inb = 1; n = 0; b++; tag = $0; sub(/.*<pre/, "<pre", tag); sub(/>.*/, ">", tag)
-                    sub(/.*<pre[^>]*>/, ""); if ($0 == "") next }
-       inb && /<\/pre/ { sub(/<\/pre.*/, ""); if ($0 != "") n++
-                         print "block " b " " tag ": " n " lines"; inb = 0; next }
-       inb { n++ }' "<work>/draft.html"
+  # lines in each <pre>, in page order, which each range label has to match
+  awk '
+    # A block starts. Remember its line, so you can find the label above it.
+    /<pre[ >]/ { block++; start = NR; lines = 0; open = 1 }
+    # Count every line of the block, tag lines included.
+    open { lines++ }
+    # Skip the opening line when no code follows the tag on it.
+    open && /<pre[^>]*>[ \t]*(<\/pre|$)/ { lines-- }
+    # Skip the closing line when nothing comes before the tag on it.
+    open && /^[ \t]*<\/pre/ { lines-- }
+    # The block ends at </pre, even when its > sits on the next line.
+    open && /<\/pre/ { print "block " block " (line " start "): " lines " lines"; open = 0 }
+  ' "<work>/draft.html"
   wc -l fastapi/cli.py                             # lines in a file
   grep -o 'pattern' path | wc -l                   # occurrences
   ```
