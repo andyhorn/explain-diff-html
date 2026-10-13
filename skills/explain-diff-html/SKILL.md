@@ -221,7 +221,8 @@ echo "$work"   # write this path out in later steps
 git fetch origin "refs/pull/<n>/head:refs/explain/pr-<n>"       # pull request only
 pr_base="$(gh pr view <n> --json baseRefOid -q .baseRefOid)"    # the commit it opened against
 if [ -z "$pr_base" ] || ! git fetch origin "$pr_base"; then
-  # The sha is unreachable or refused: diff from where the head left the base branch.
+  # No sha from gh, or the server refused it: diff from where the head left the base branch.
+  pr_base=""
   base_name="$(gh pr view <n> --json baseRefName -q .baseRefName)"
   [ -n "$base_name" ] && git fetch origin "$base_name" &&
     pr_base="$(git merge-base FETCH_HEAD refs/explain/pr-<n>)"
