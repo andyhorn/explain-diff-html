@@ -32,7 +32,7 @@ status=0
 # A reference is a <code> span or .filename label that starts with path.ext:line.
 # A host:port such as example.com:8080 looks the same, so drop common TLDs.
 flat=$(tr '\n' ' ' < "$page" | sed -E 's#</?a[^>]*>##g; s/  +/ /g')
-ref='(<code[^>]*>|class="filename"[^>]*>) *[A-Za-z0-9_./-]+\.[A-Za-z0-9]+:[0-9]+(-[0-9]+)?[ ,<]'
+ref='(<code[^>]*>|<[a-z]+ [^>]*class="([^"]* )?filename( [^"]*)?"[^>]*>) *[A-Za-z0-9_./-]+\.[A-Za-z][A-Za-z0-9]*:[0-9]+(-[0-9]+)?[ ,<]'
 tld='\.(com|org|net|io|dev|app|local|internal|localhost):'
 count() { printf '%s\n' "$flat" | grep -oE "$ref" | grep -vE "$tld" | grep -cE "$1"; }
 refs=$(count '.')
