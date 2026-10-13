@@ -98,7 +98,11 @@ that mistake now fails instead of passing.
 
   The count takes a `<code>` span or `.filename` label that starts with
   `path.ext:line`. A `host:port` such as `example.com:8080` has the same shape,
-  so the script drops one whose extension is a common top-level domain.
+  so the script drops one whose extension is `com`, `org`, `net`, `io`, `dev`,
+  `app`, `local`, `internal`, or `localhost`. The last three are host suffixes
+  rather than top-level domains. `org`, `app`, and `dev` are also file
+  extensions, so an unlinked `notes.org:12` is dropped and never fails. The
+  script accepts that miss over a false FAIL on `host.org:8080`.
 
   The sha check alone proves nothing: with no links on the page it finds
   nothing and reports success, which is exactly when the feature is most
