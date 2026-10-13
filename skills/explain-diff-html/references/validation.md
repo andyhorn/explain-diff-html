@@ -82,11 +82,12 @@ that mistake now fails instead of passing.
   short commit, and on a link to a `.md` or `.markdown` file that has a line
   anchor and no `?plain=1`.
 
-  Mark each reference you deliberately leave bare with a `data-bare` attribute
-  naming the reason, as in `<code data-bare="outside-repo">main.py:8</code>` or
+  Mark each reference you deliberately leave bare with a `data-bare` attribute,
+  as in `<code data-bare="outside-repo">main.py:8</code>` or
   `<p class="filename" data-bare="outside-repo">`. The attribute does not change
   how the page renders. It is how the script tells a deliberate choice from a
-  reference the run forgot to link.
+  reference the run forgot to link. The script checks only that the attribute
+  is present; the value is for readers.
 
   The script's count needs both the `tr` and the `sed`. A `.filename` label
   reads `class="filename">path:line` when bare and
