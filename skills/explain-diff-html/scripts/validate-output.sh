@@ -14,6 +14,10 @@ if [ -z "$page" ] || [ -z "$sha" ]; then
   echo "usage: sh validate-output.sh <drafted page> <short commit>" >&2
   exit 2
 fi
+if ! printf '%s\n' "$sha" | grep -qE '^[0-9a-f]{4,40}$'; then
+  echo "usage: <short commit> must be 4 to 40 lowercase hex characters" >&2
+  exit 2
+fi
 
 # A directory passes test -s, and step 8's $out is a directory, so require a
 # regular file as well.
@@ -30,13 +34,16 @@ refs=$(tr '\n' ' ' < "$page" | sed -E 's#</?a[^>]*>##g; s/  +/ /g' \
 links=$(grep -o 'class="srcref"' "$page" | wc -l | tr -d ' ')
 echo "references=$refs linked=$links"
 
-wrong=$(grep -o 'href="[^"]*/blob/[^"]*"' "$page" | grep -v "$sha")
+# A link names the full 40-character sha. GitHub resolves an abbreviation only
+# while the commit is on a branch, so a short sha 404s once a squash merge lands.
+full="/blob/${sha}[0-9a-f]{$((40 - ${#sha}))}/"
+wrong=$(grep -o 'href="[^"]*/blob/[^"]*"' "$page" | grep -vE "$full")
 if [ -n "$wrong" ]; then
-  echo "FAIL: links that do not name $sha:"
+  echo "FAIL: links that do not name the full 40-character sha starting $sha:"
   echo "$wrong"
   status=1
 else
-  echo "pass: no blob link names another commit"
+  echo "pass: every blob link names the full sha of $sha"
 fi
 
 # GitHub renders Markdown, and the rendered view ignores a line anchor. Match
@@ -51,12 +58,20 @@ else
   echo "pass: every Markdown line link carries ?plain=1"
 fi
 
+# The quiz is the last section in <main>, so read from its tag to </main>.
+# A nested </section> cannot end it early, and id can sit anywhere in the tag.
 quiz() {
-  sed -n '/<section id="quiz"/,/<\/section>/p' "$page" \
+  sed -n '/id="quiz"/,/<\/main>/p' "$page" \
     | tr '\n' ' ' | sed -E 's/<[^>]+>/ /g; s/  +/ /g'
 }
 
-positional=$(quiz | grep -oEi 'the (first|second|third|last) option|the (former|latter)\b')
+quiz_text=$(quiz)
+if [ -z "$(printf '%s' "$quiz_text" | tr -d ' ')" ]; then
+  echo "FAIL: no quiz section found, so the quiz checks read nothing"
+  status=1
+fi
+
+positional=$(printf '%s\n' "$quiz_text" | grep -oEi 'the (first|second|third|last) option|the (former|latter)\b')
 if [ -n "$positional" ]; then
   echo "FAIL: quiz text names an option by position:"
   echo "$positional"
@@ -66,6 +81,6 @@ else
 fi
 
 echo "advisory: ordinals in the quiz, read each one:"
-quiz | grep -oEi 'the (first|second|third|last|former|latter)\b[^.]{0,40}' || echo "  none"
+printf '%s\n' "$quiz_text" | grep -oEi 'the (first|second|third|last|former|latter)\b[^.]{0,40}' || echo "  none"
 
 exit $status

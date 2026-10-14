@@ -68,7 +68,9 @@ So on Windows, run the skill from a WSL or Git Bash session. Check first rather
 than discovering it at the first command:
 
 ```bash
-command -v mktemp sed >/dev/null || echo "run this from WSL or Git Bash, not PowerShell"
+for tool in mktemp sed openssl; do
+  command -v "$tool" >/dev/null || echo "missing $tool: run this from WSL or Git Bash, not PowerShell"
+done
 ```
 
 Test for the tools rather than for bash. Every command here is POSIX, so zsh is
@@ -441,8 +443,28 @@ gh pr view <n> --json url -q .url    # https://github.com/owner/repo/pull/<n>
                                      # strip the trailing /pull/<n>
 
 # Branch, commit range, single commit, or no argument:
-git remote get-url origin | sed -E 's#^git@([^:]+):#https://\1/#; s#\.git$##'
+git remote get-url origin | sed -E '
+  # Drop a port. This runs before the scheme goes, because after that the
+  # owner in git@github.com:1234/repo.git would read like a port.
+  s#^([a-z+]+://[^/]*):[0-9]+/#\1/#
+  # Drop the scheme, such as https://, ssh://, or git+ssh://.
+  s#^[a-z+]+://##
+  # Drop credentials, such as git@ or user:token@, so no token reaches a link.
+  s#^[^@/]*@##
+  # Turn the host:owner form into host/owner.
+  s#^([^:/]+):#\1/#
+  # Drop a trailing .git, then a trailing slash.
+  s#\.git/?$##
+  s#/$##
+  # Print nothing unless the host is exactly github.com.
+  /^github\.com\//!d
+  s#^#https://#'
 ```
+
+Empty output means leave every reference bare. A CI clone's remote can embed a
+token, as in `https://x-access-token:<token>@github.com/owner/repo.git`, and
+without the credentials line that token lands in every link on a page meant
+for sharing.
 
 Build each link against the same commit the provenance line names, using the
 full 40-character sha:
@@ -490,7 +512,8 @@ it does today.
 
 This is GitHub only, on purpose. A url from `gh` names a GitHub-family host by
 construction, so link against whatever host it gives you. A parsed remote could
-be any forge, so link it only when the host is exactly `github.com`. GitLab and
+be any forge, so link it only when the host is exactly `github.com`, which the
+`sed` above enforces. GitLab and
 Bitbucket build blob URLs differently, and a GitHub-shaped URL aimed at them
 resolves to nothing. Leave those references bare rather than guess.
 
@@ -540,6 +563,10 @@ Build the five questions from the question shapes in
 `references/quiz-design.md`, in this skill's folder. Read it before you write a
 question. The file's rules stop a reader from answering by recall, by option
 length, or by position.
+
+Keep the quiz as the last section in `<main>`, where the template puts it, and
+add no section after it. The validation script reads the quiz from its tag to
+`</main>`, so anything placed after it is checked as quiz text.
 
 ### 6. Humanize the prose
 
