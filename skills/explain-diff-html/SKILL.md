@@ -38,14 +38,14 @@ Continue when the work still happens another way, and say what was weaker.
 
 | Tool   | Needed when                              | Used for                                               |
 | ------ | ---------------------------------------- | ------------------------------------------------------ |
-| `git`  | Every run                                | Resolving the base, fetching the ref, reading the diff |
-| `gh`   | Explaining a pull request                | Fetching the pull request title, body, and URL         |
+| `git`  | Reading from a local clone               | Resolving the base, fetching the ref, reading the diff |
+| `gh`   | Explaining a pull request without a clone | Fetching the pull request data via GitHub API         |
 | `node` | Every run that carries a Mermaid diagram | Validating Mermaid sources in step 4, through `npx`    |
 
 Verify them up front:
 
 ```bash
-command -v git  >/dev/null || echo "git is required"
+command -v git  >/dev/null || echo "git is required for local clones"
 command -v node >/dev/null || echo "node is required for a page with a Mermaid diagram"
 command -v gh   >/dev/null && gh auth status   # pull request targets only
 ```
@@ -87,7 +87,9 @@ Three details this table hides:
 - `gh` must be authenticated, not merely installed. `gh auth status` is the
   check. Without `gh` the skill still explains a branch or a commit range; it
   cannot reach a pull request body, which is usually where the why lives. Say
-  on the page that the body was not read.
+  on the page that the body was not read. When a local clone is present, `gh`
+  is optional but recommended. Without a clone, `gh` is required for pull
+  request access.
 - `node` is a build-time validator only. The reader's browser loads Mermaid from
   the CDN, so nobody needs Node to open the finished page.
 - `npx -y` downloads the pinned validator on first use and caches it, so the
@@ -106,6 +108,42 @@ be.
 
 A run whose change warrants none of those four shapes needs no Mermaid, and
 therefore no Node. The hand-built families cover it.
+
+### Local clone vs. no clone
+
+The skill has two paths for explaining a pull request.
+
+**With a local clone** (the default path): the skill runs inside a git checkout,
+uses `git fetch` and `gh pr view` to resolve the PR, and reads changed files
+from the working tree.
+
+**Without a local clone**: the skill uses `gh pr view` with the `-R owner/repo`
+flag to reach a repository you haven't cloned, and GitHub's Contents API to
+fetch file contents at the PR's head commit. This path requires `gh` to be
+authenticated and a PR number or URL as the target.
+
+Both paths produce the same output format and honor the same output contract.
+The only differences are how the skill resolves the target and gathers file
+contents.
+
+Detect which path to use:
+
+```bash
+in_repo=false
+if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
+  in_repo=true
+fi
+```
+
+The rest of this step explains the clone path. The no-clone path follows the
+same target-selection rules but replaces `git` and working-tree reads with `gh`
+and the Contents API.
+
+The provenance line should say whether references are linked. Close it with
+`References link to this commit.` when they are, or with the reason when they
+are not, as in `References are not linked: the host is not GitHub.` A bare
+`file:line` carries no clue about why it is bare, so without this a reader
+cannot tell a deliberate choice from a broken page.
 
 ## Output contract
 
@@ -252,6 +290,75 @@ works. The git form above still asks `gh` for the base commit, so it does not
 replace `gh`. Without `gh`, ask the user which commit the pull request is based
 on rather than guessing one.
 
+#### No-clone path (for pull requests only, without a local git checkout)
+
+When you're not in a git checkout, the clone path cannot work. Instead, use
+`gh` with the `-R` flag to reach the repository, and GitHub's Contents API to
+fetch file contents.
+
+Detect whether a clone is present:
+
+```bash
+in_repo=false
+if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
+  in_repo=true
+fi
+```
+
+If `in_repo` is false and the target is a pull request, follow this no-clone
+path:
+
+1. **Parse the PR number or URL** to extract owner, repo, and PR number.
+   - From a URL like `https://github.com/owner/repo/pull/123`, extract `owner`,
+     `repo`, and `123`.
+   - From a bare number or `owner/repo#123`, extract the parts from the context
+     or ask the user.
+
+2. **Fetch PR metadata via `gh`** with the `-R` flag:
+   ```bash
+   gh pr view <n> -R owner/repo --json \
+     title,body,url,headRefName,headRefOid,baseRefName,baseRefOid,files
+   ```
+   This returns the PR title, body, the head commit SHA (`headRefOid`), the
+   list of changed files, and other metadata.
+
+3. **Extract the head commit SHA** from `headRefOid`. Use this 40-character SHA
+   as the anchor for every `file:line` reference and the provenance line.
+
+4. **Fetch file contents via the Contents API** for each changed file:
+   ```bash
+   curl -s "https://api.github.com/repos/owner/repo/contents/path/to/file?ref=<head-sha>" \
+     -H "Authorization: token <your-gh-token>" \
+     | jq -r '.content' | base64 -d
+   ```
+   Use the `-R` flag with `gh` when possible; it handles authentication
+   automatically. For the Contents API, `gh` can provide the token:
+   ```bash
+   curl -s "https://api.github.com/repos/owner/repo/contents/path/to/file?ref=<head-sha>" \
+     -H "Authorization: Bearer $(gh auth token)"
+   ```
+
+5. **Get the diff** via `gh pr diff`:
+   ```bash
+   gh pr diff <n> -R owner/repo > "$work/diff.txt"
+   ```
+   This returns the same diff as `git diff`, without requiring a local clone.
+
+6. **Store each file's contents** at the head commit in a temporary directory:
+   ```bash
+   echo "$file_content" > "$work/files/path/to/file"
+   ```
+   The rest of the skill reads these files as though they were in a working tree.
+
+7. **Proceed to step 2** (gather surrounding context) using the stored files
+   instead of reading from the working tree.
+
+The provenance line should say `References link to this commit.` because the
+skill builds all links against the head commit SHA from `headRefOid`.
+
+The clone path, including the fallbacks from #20, stays as it is. The no-clone
+path adds a second option for pull requests without a clone.
+
 Fetching a bare sha is not always allowed. The server decides whether to serve
 an object that no ref advertises. GitHub.com serves one that is reachable, and a
 GitHub Enterprise install may refuse. A base branch that was force-pushed or
@@ -334,6 +441,14 @@ Explore the code the diff touches and the code around it, enough to explain the
 existing system. Ground every claim about what the code does in the code
 itself. Read the changed files at the target ref, and the callers and
 definitions they interact with.
+
+**With a local clone**: read the changed files from the working tree after
+fetching the PR ref into `refs/explain/pr-<n>` (clone path) or a branch ref
+(branch path).
+
+**Without a local clone**: the no-clone path stores each changed file's contents
+at the head commit in `$work/files/<path>`. Read from that location instead of
+the working tree.
 
 Ground the why in the durable record rather than in the diff alone. A diff
 shows what moved; it rarely says why that was the right move. Gather, in
